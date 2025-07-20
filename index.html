@@ -1,15 +1,130 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <title>Solid App</title>
-  </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Math Chatbot</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.11.0/math.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      background: #007acc;
+      color: white;
+      margin: 0;
+      padding: 1em;
+    }
+    #chat {
+      flex: 1;
+      padding: 1em;
+      overflow-y: auto;
+    }
+    .message {
+      margin-bottom: 1em;
+    }
+    .user {
+      font-weight: bold;
+      color: #007acc;
+    }
+    .bot {
+      color: #333;
+    }
+    #inputArea {
+      display: flex;
+      padding: 1em;
+      background: #eee;
+    }
+    input {
+      flex: 1;
+      padding: 0.5em;
+      font-size: 1em;
+    }
+    button {
+      padding: 0.5em 1em;
+      font-size: 1em;
+      margin-left: 0.5em;
+      background: #007acc;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>Math Chatbot</h1>
+  <div id="chat"></div>
+  <div id="inputArea">
+    <input type="text" id="userInput" placeholder="Type your math question..." />
+    <button onclick="handleInput()">Send</button>
+  </div>
 
-    <script src="/src/index.tsx" type="module"></script>
-  </body>
+  <script>
+    const chat = document.getElementById("chat");
+    const input = document.getElementById("userInput");
+    const scope = {}; // memory of variables
+
+    function addMessage(sender, text) {
+      const msg = document.createElement("div");
+      msg.className = "message";
+      msg.innerHTML = `<span class="${sender}">${sender === 'user' ? 'You' : 'Bot'}:</span> ${text}`;
+      chat.appendChild(msg);
+      chat.scrollTop = chat.scrollHeight;
+    }
+
+    function handleInput() {
+      const userText = input.value.trim();
+      if (!userText) return;
+
+      addMessage("user", userText);
+      input.value = "";
+
+      const response = solveMath(userText);
+      addMessage("bot", response);
+    }
+
+    function solveMath(text) {
+      try {
+        // Replace "if" and "what is" style text with proper math expressions
+        let clean = text.toLowerCase()
+          .replace(/if/g, '')
+          .replace(/what is/g, '')
+          .replace(/what's/g, '')
+          .replace(/solve/g, '')
+          .replace(/find/g, '')
+          .replace(/\?/g, '')
+          .trim();
+
+        // Split by "and", evaluate left to right
+        const parts = clean.split(/\band\b|,/);
+        let lastResult = '';
+
+        for (let part of parts) {
+          part = part.trim();
+          if (part.includes('=')) {
+            lastResult = math.evaluate(part, scope);
+          } else {
+            lastResult = math.evaluate(part, scope);
+          }
+        }
+
+        return `Answer: ${lastResult}`;
+      } catch (err) {
+        return "Sorry, I couldn't understand that. Try something like: if x=2 and y=2x what is y.";
+      }
+    }
+
+    // Enter key support
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") handleInput();
+    });
+  </script>
+</body>
 </html>
